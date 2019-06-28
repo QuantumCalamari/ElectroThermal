@@ -406,39 +406,6 @@ int main()
 //****************************************************************************80
 
 void dtable_data_write(ofstream& output, int m, int n, double table[])
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    DTABLE_DATA_WRITE writes data to a DTABLE file.
-//
-//  Discussion:
-//
-//    The file should already be open.
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license. 
-//
-//  Modified:
-//
-//    11 December 2003
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    Input, ofstream &OUTPUT, a pointer to the output stream.
-//
-//    Input, int M, the spatial dimension.
-//
-//    Input, int N, the number of points.
-//
-//    Input, double TABLE[M*N], the table data.
-//
 {
 	int i;
 	int j;
@@ -458,37 +425,6 @@ void dtable_data_write(ofstream& output, int m, int n, double table[])
 
 void dtable_write(string output_filename, int m, int n, double table[],
 	bool header)
-
-	//****************************************************************************80
-	//
-	//  Purpose:
-	//
-	//    DTABLE_WRITE writes information to a DTABLE file.
-	//
-	//  Licensing:
-	//
-	//    This code is distributed under the GNU LGPL license. 
-	//
-	//  Modified:
-	//
-	//    23 February 2009
-	//
-	//  Author:
-	//
-	//    John Burkardt
-	//
-	//  Parameters:
-	//
-	//    Input, string OUTPUT_FILENAME, the output filename.
-	//
-	//    Input, int M, the spatial dimension.
-	//
-	//    Input, int N, the number of points.
-	//
-	//    Input, double TABLE[M*N], the table data.
-	//
-	//    Input, bool HEADER, is TRUE if the header is to be included.
-	//
 {
 	ofstream output;
 
@@ -517,39 +453,6 @@ void dtable_write(string output_filename, int m, int n, double table[],
 
 void f(double a, double b, double t0, double t, int n, double x[],
 	double value[])
-
-	//****************************************************************************80
-	//
-	//  Purpose:
-	//
-	//    F returns the right hand side of the heat equation.
-	//
-	//  Licensing:
-	//
-	//    This code is distributed under the GNU LGPL license.
-	//
-	//  Modified:
-	//
-	//    15 May 2009
-	//
-	//  Author:
-	//
-	//    John Burkardt
-	//
-	//  Parameters:
-	//
-	//    Input, double A, B, the left and right endpoints.
-	//
-	//    Input, double T0, the initial time.
-	//
-	//    Input, double T, the current time.
-	//
-	//    Input, int N, the number of points.
-	//
-	//    Input, double X[N], the current spatial positions.
-	//
-	//    Output, double VALUE[N], the prescribed value of U(X(:),T0).
-	//
 {
 	int i;
 
@@ -562,60 +465,6 @@ void f(double a, double b, double t0, double t, int n, double x[],
 //****************************************************************************80
 
 int r83_np_fa(int n, double a[])
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    R83_NP_FA factors a R83 system without pivoting.
-//
-//  Discussion:
-//
-//    The R83 storage format is used for a tridiagonal matrix.
-//    The superdiagonal is stored in entries (1,2:N), the diagonal in
-//    entries (2,1:N), and the subdiagonal in (3,1:N-1).  Thus, the
-//    original matrix is "collapsed" vertically into the array.
-//
-//    Because this routine does not use pivoting, it can fail even when
-//    the matrix is not singular, and it is liable to make larger
-//    errors.
-//
-//    R83_NP_FA and R83_NP_SL may be preferable to the corresponding
-//    LINPACK routine SGTSL for tridiagonal systems, which factors and solves
-//    in one step, and does not save the factorization.
-//
-//  Example:
-//
-//    Here is how a R83 matrix of order 5 would be stored:
-//
-//       *  A12 A23 A34 A45
-//      A11 A22 A33 A44 A55
-//      A21 A32 A43 A54  *
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license. 
-//
-//  Modified:
-//
-//    11 January 2004
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    Input, int N, the order of the matrix.
-//    N must be at least 2.
-//
-//    Input/output, double A[3*N].
-//    On input, the tridiagonal matrix.  On output, factorization information.
-//
-//    Output, int R83_NP_FA, singularity flag.
-//    0, no singularity detected.
-//    nonzero, the factorization failed on the INFO-th step.
-//
 {
 	int i;
 
@@ -651,56 +500,6 @@ int r83_np_fa(int n, double a[])
 //****************************************************************************80
 
 double* r83_np_sl(int n, double a_lu[], double b[], int job)
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    R83_NP_SL solves a R83 system factored by R83_NP_FA.
-//
-//  Discussion:
-//
-//    The R83 storage format is used for a tridiagonal matrix.
-//    The superdiagonal is stored in entries (1,2:N), the diagonal in
-//    entries (2,1:N), and the subdiagonal in (3,1:N-1).  Thus, the
-//    original matrix is "collapsed" vertically into the array.
-//
-//  Example:
-//
-//    Here is how a R83 matrix of order 5 would be stored:
-//
-//       *  A12 A23 A34 A45
-//      A11 A22 A33 A44 A55
-//      A21 A32 A43 A54  *
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license. 
-//
-//  Modified:
-//
-//    12 January 2004
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    Input, int N, the order of the matrix.
-//    N must be at least 2.
-//
-//    Input, double A_LU[3*N], the LU factors from R83_NP_FA.
-//
-//    Input, double B[N], the right hand side of the linear system.
-//    On output, B contains the solution of the linear system.
-//
-//    Input, int JOB, specifies the system to solve.
-//    0, solve A * x = b.
-//    nonzero, solve A' * x = b.
-//
-//    Output, double R83_NP_SL[N], the solution of the linear system.
-//
 {
 	int i;
 	double* x;
@@ -760,33 +559,6 @@ double* r83_np_sl(int n, double a_lu[], double b[], int job)
 //****************************************************************************80
 
 void timestamp()
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    TIMESTAMP prints the current YMDHMS date as a time stamp.
-//
-//  Example:
-//
-//    May 31 2001 09:45:54 AM
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license. 
-//
-//  Modified:
-//
-//    02 October 2003
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    None
-//
 {
 # define TIME_SIZE 40
 
@@ -808,39 +580,6 @@ void timestamp()
 //****************************************************************************80
 
 void u0(double a, double b, double t0, int n, double x[], double value[])
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    U0 returns the initial condition at the starting time.
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license.
-//
-//  Modified:
-//
-//    15 May 2009
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    Input, double A, B, the left and right endpoints
-//
-//    Input, double T0, the initial time.
-//
-//    Input, double T, the current time.
-//
-//    Input, int N, the number of points where initial data is needed.
-//
-//    Input, double X[N], the positions where initial data is needed.
-//
-//    Output, double VALUE[N], the prescribed value of U(X,T0).
-//
 {
 	int i;
 
@@ -856,35 +595,6 @@ void u0(double a, double b, double t0, int n, double x[], double value[])
 //****************************************************************************80
 
 double ua(double a, double b, double t0, double t)
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    UA returns the Dirichlet boundary condition at the left endpoint.
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license.
-//
-//  Modified:
-//
-//    15 May 2009
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    Input, double A, B, the left and right endpoints
-//
-//    Input, double T0, the initial time.
-//
-//    Input, double T, the current time.
-//
-//    Output, double UA, the prescribed value of U(A,T).
-//
 {
 	double value;
 
@@ -895,35 +605,6 @@ double ua(double a, double b, double t0, double t)
 //****************************************************************************80
 
 double ub(double a, double b, double t0, double t)
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    UB returns the Dirichlet boundary condition at the right endpoint.
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license.
-//
-//  Modified:
-//
-//    15 May 2009
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    Input, double A, B, the left and right endpoints
-//
-//    Input, double T0, the initial time.
-//
-//    Input, double T, the current time.
-//
-//    Output, double UB, the prescribed value of U(B,T).
-//
 {
 	double value;
 
@@ -931,6 +612,7 @@ double ub(double a, double b, double t0, double t)
 	
 	return value;
 }
+//****************************************************************************80
 
 double sqr(double a) {
 
