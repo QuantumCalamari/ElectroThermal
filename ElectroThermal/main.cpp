@@ -141,7 +141,7 @@ int main()
 	double kb = 1.38064852E-23;
 
 	//applied current
-	double i_app = 200E-6;
+	double i_app = 140E-6;
 	//Ic(0)
 	double i_c_abs = 320E-6;
 	//double i_c = i_c_abs;
@@ -155,10 +155,10 @@ int main()
 	double rn;
 
 	//physical wire dimensions
-	double b_width = 50E-9;
-	double b_length = 100E-9;
+	double b_width = 100E-9;
+	double b_length = 15E-9;
 	double len_seg;
-	double d = 5E-9;
+	double d = 4E-9;
 
 	//current density
 	double j_den = i_app / (b_width * d);
@@ -172,7 +172,7 @@ int main()
 	//critical temperature
 	double t_c = 4;
 	//constants alpha and beta
-	double alpha = 1E-103;
+	double alpha = 2E-103;
 	double beta = alpha;
 
 	//specific heat constants
@@ -196,7 +196,7 @@ int main()
 	//
 	x_min = 0.0;
 	x_max = 0.3;
-	x_num = 11;
+	x_num = 101;
 	x_delt = (x_max - x_min) / (double)(x_num - 1);
 	
 	len_seg = b_length / x_num;
@@ -214,7 +214,7 @@ int main()
 	//  Set T values.
 	//
 	t_min = 0.0;
-	t_max = 0.0001;
+	t_max = 0.00001;
 	t_num = 10001;
 	t_delt = (t_max - t_min) / (double)(t_num - 1);
 
@@ -271,14 +271,12 @@ int main()
 			k = lorenz * u[i + (j - 1) * x_num] / rho * (u[i + (j - 1) * x_num] / t_c);
 			//c = A_prop * exp(-delta / (kb * u[i + j * x_num]));
 			//below is a temporary value for c
-			c = 9800;
+			c = 9800 + 2400;
 		}
 
-	
+	k = 5E-1;
 
-
-
-	w = k * t_delt / x_delt / x_delt / c;
+	w = k * t_delt / x_delt / x_delt;
 
 	a = new double[3 * x_num];
 
@@ -355,7 +353,9 @@ int main()
 			alpha = beta * sqr(u[i + (j - 1) * x_num]);
 			
 			//calculation of joule and radiative transfer
-			joule = sqr(j_den) * rho * t_delt;
+			
+			joule = sqr(j_den) * rho * t_delt * (b_width * d * len_seg) / kb / (c * u[i + (j - 1) * x_num]);
+			//joule = i_app * r * t_delt;
 			rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt;
 
 			u[i + j * x_num] = fvec[i] - rad_sub + joule;
@@ -588,8 +588,8 @@ void u0(double a, double b, double t0, int n, double x[], double value[])
 		value[i] = 2.0;
 	}
 
-	value[5] = 12;
-
+	value[50] = 12;
+	
 	return;
 }
 //****************************************************************************80

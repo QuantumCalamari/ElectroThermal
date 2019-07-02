@@ -1,7 +1,7 @@
 ﻿  main.cpp
-C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(165,9): warning C4101:  'ces': unreferenced local variable
-C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(146,9): warning C4101:  'rn': unreferenced local variable
-C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(143,9): warning C4101:  'i_c_test': unreferenced local variable
-C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(164,9): warning C4101:  'cen': unreferenced local variable
-C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(154,9): warning C4101:  'j_c': unreferenced local variable
+C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(181,9): warning C4101:  'ces': unreferenced local variable
+C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(155,9): warning C4101:  'rn': unreferenced local variable
+C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(150,9): warning C4101:  'i_c_test': unreferenced local variable
+C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(180,9): warning C4101:  'cen': unreferenced local variable
+C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(165,9): warning C4101:  'j_c': unreferenced local variable
   ElectroThermal.vcxproj -> C:\Users\jc15\source\repos\ElectroThermal\Debug\ElectroThermal.exe
