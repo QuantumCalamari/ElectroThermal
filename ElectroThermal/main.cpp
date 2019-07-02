@@ -155,10 +155,10 @@ int main()
 	double rn;
 
 	//physical wire dimensions
-	double b_width = 100E-9;
+	double b_width = 140E-9;
 	double b_length = 15E-9;
 	double len_seg;
-	double d = 4E-9;
+	double d = 40E-9;
 
 	//current density
 	double j_den = i_app / (b_width * d);
@@ -175,6 +175,7 @@ int main()
 	double alpha = 2E-103;
 	double beta = alpha;
 
+
 	//specific heat constants
 	double gamma = 240.0;
 	double cen;
@@ -182,6 +183,7 @@ int main()
 	double delta = 2.1E-3 * 1.602176634E-19; //http://www.jetp.ac.ru/cgi-bin/dn/e_053_06_1270.pdf
 	double c;
 	double A_prop = 2.43 * gamma * t_c / exp(-delta / (kb * t_c));
+	double nb_den = 8570;
 
 	//radiative transfer term
 	double rad_sub = 0;
@@ -354,7 +356,7 @@ int main()
 			
 			//calculation of joule and radiative transfer
 			
-			joule = sqr(j_den) * rho * t_delt * (b_width * d * len_seg) / kb / (c * u[i + (j - 1) * x_num]);
+			joule = sqr(j_den) * rho * t_delt * (b_width * d * len_seg) / (c * nb_den * (b_width * d * len_seg));
 			//joule = i_app * r * t_delt;
 			rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt;
 
