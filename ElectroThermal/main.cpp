@@ -122,7 +122,7 @@ int main()
 	double kb = 1.38064852E-23;
 
 	//applied current
-	double i_app = 140E-6;
+	double i_app = 105E-6;
 	//Ic(0)
 	double i_c_abs = 320E-6;
 	//double i_c = i_c_abs;
@@ -139,7 +139,7 @@ int main()
 	double b_width = 140E-9;
 	double b_length = 15E-9;
 	double len_seg;
-	double d = 40E-9;
+	double d = 4E-9;
 
 	//current density
 	double j_den = i_app / (b_width * d);
@@ -159,6 +159,8 @@ int main()
 
 	//specific heat constants
 	double gamma = 240.0;
+	double sc_band_gap = 2E-3;
+	double ev_con = 1.602176634E-19;
 	double cen;
 	double ces;
 	double delta = 2.1E-3 * 1.602176634E-19; //http://www.jetp.ac.ru/cgi-bin/dn/e_053_06_1270.pdf
@@ -180,7 +182,7 @@ int main()
 	//
 	x_min = 0.0;
 	x_max = 0.3;
-	x_num = 101;
+	x_num = 21;
 	x_delt = (x_max - x_min) / (double)(x_num - 1);
 	
 	len_seg = b_length / x_num;
@@ -236,26 +238,27 @@ int main()
 		
 		if (u[i + j * x_num] < t_c || i_app < i_c[i]) {
 			rho = 0;
-			k *= (u[i] / t_c);
-			c = A_prop * exp(-delta / (kb * u[i + j * x_num]));
+			k = lorenz * sqr(u[i + (j - 1) * x_num]) / (r * (b_width * d) * (u[i + (j - 1) * x_num] / t_c));
+			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 		else {
 			rho = r * (b_width * d);
 			c = gamma * u[i + j * x_num];
+			k = lorenz * u[i] / rho;
 		}
 	}
 	else
-		if (u[i + (j - 1) * x_num] > t_c) {
+		if (u[i] > t_c) {
 			//this is the normal state
-			k = lorenz * u[i + (j - 1) * x_num] / rho;
+			k = lorenz * u[i] / rho;
 			c = gamma * u[i + j * x_num];
 		}
 		else {
 			//this is the superconducting state
-			k = lorenz * u[i + (j - 1) * x_num] / rho * (u[i + (j - 1) * x_num] / t_c);
-			//c = A_prop * exp(-delta / (kb * u[i + j * x_num]));
-			//below is a temporary value for c
-			c = 9800 + 2400;
+			k = lorenz * u[i] / rho;
+
+			//k = lorenz * sqr(u[i + (j - 1) * x_num]) / (r * (b_width * d) * (u[i + (j - 1) * x_num] / t_c));
+			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 
 	k = 5E2;
@@ -319,12 +322,16 @@ int main()
 			}
 			else {
 				//checks to see if superconductor or normal
-				if (u[i + (j-1) * x_num] < t_c)
+				if (u[i + (j - 1) * x_num] < t_c) {
 					//normal state
-					i_c[i] = i_c_abs * sqr(1 - (sqr(u[i + (j-1) * x_num] / t_c)));
-				else
+					i_c[i] = i_c_abs * sqr(1 - (sqr(u[i + (j - 1) * x_num] / t_c)));
+					c = gamma * u[i + (j - 1) * x_num];
+				}
+				else {
 					//superconducting state
 					i_c[i] = 0;
+					c = A_prop * exp(-delta / (kb * u[i + (j - 1) * x_num]));
+				}
 
 				j_den = i_app / (b_width * d);
 				//k = lorenz * 
@@ -342,7 +349,7 @@ int main()
 			//joule = i_app * r * t_delt;
 			alpha = B * u[i + (j - 1) * x_num] * sqr(u[i + (j - 1) * x_num]);
 
-			rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt * len_seg * b_width / c; //needs a heat capacitance and a mass term somewhere
+			rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
 
 			u[i + j * x_num] = fvec[i] - rad_sub + joule;
 		}
@@ -573,7 +580,7 @@ void u0(double a, double b, double t0, int n, double x[], double value[])
 		value[i] = 2.0;
 	}
 
-	value[50] = 12;
+	value[10] = 12;
 	
 	return;
 }
