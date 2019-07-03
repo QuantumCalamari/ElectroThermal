@@ -107,27 +107,8 @@ int main()
 
 	timestamp();
 	cout << "\n";
-	cout << "FD1D_HEAT_IMPLICIT\n";
-	cout << "  C++ version\n";
+	cout << "Electro-Thermal simulation of 1D superconducting wire\n";
 	cout << "\n";
-	cout << "  Finite difference solution of\n";
-	cout << "  the time dependent 1D heat equation\n";
-	cout << "\n";
-	cout << "    Ut - k * Uxx = F(x,t)\n";
-	cout << "\n";
-	cout << "  for space interval A <= X <= B with boundary conditions\n";
-	cout << "\n";
-	cout << "    U(A,t) = UA(t)\n";
-	cout << "    U(B,t) = UB(t)\n";
-	cout << "\n";
-	cout << "  and time interval T0 <= T <= T1 with initial condition\n";
-	cout << "\n";
-	cout << "    U(X,T0) = U0(X).\n";
-	cout << "\n";
-	cout << "  A second order difference approximation is used for Uxx.\n";
-	cout << "\n";
-	cout << "  A first order backward Euler difference approximation\n";
-	cout << "  is used for Ut.\n";
 
 	clock_t begin = clock();
 
@@ -172,7 +153,7 @@ int main()
 	//critical temperature
 	double t_c = 4;
 	//constants alpha and beta
-	double alpha = 2E-103;
+	double alpha = 2E-1;
 	double beta = alpha;
 
 
@@ -184,6 +165,7 @@ int main()
 	double c;
 	double A_prop = 2.43 * gamma * t_c / exp(-delta / (kb * t_c));
 	double nb_den = 8570;
+	double B = 8E2; //calculated from the Yang paper, alpha = 8E5 at 10 K
 
 	//radiative transfer term
 	double rad_sub = 0;
@@ -276,7 +258,7 @@ int main()
 			c = 9800 + 2400;
 		}
 
-	k = 5E-1;
+	k = 5E2;
 
 	w = k * t_delt / x_delt / x_delt;
 
@@ -358,7 +340,9 @@ int main()
 			
 			joule = sqr(j_den) * rho * t_delt * (b_width * d * len_seg) / (c * nb_den * (b_width * d * len_seg));
 			//joule = i_app * r * t_delt;
-			rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt;
+			alpha = B * u[i + (j - 1) * x_num] * sqr(u[i + (j - 1) * x_num]);
+
+			rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt * len_seg * b_width / c; //needs a heat capacitance and a mass term somewhere
 
 			u[i + j * x_num] = fvec[i] - rad_sub + joule;
 		}
@@ -386,7 +370,6 @@ int main()
 	cout << "  U data written to \"" << u_file << "\".\n";
 
 	cout << "\n";
-	cout << "FD1D_HEAT_IMPLICIT\n";
 	cout << "  Normal end of execution.\n";
 	cout << "\n";
 	timestamp();
@@ -401,7 +384,7 @@ int main()
 	clock_t end = clock();
 	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 
-	std::cout << "this took " << elapsed_secs << " seconds" << std::endl;
+	std::cout << "Calculation time was " << elapsed_secs << " seconds" << std::endl;
 
 	return 0;
 }
