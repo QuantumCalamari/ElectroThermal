@@ -4,5 +4,4 @@ C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(134,9): warnin
 C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(131,9): warning C4101:  'i_c_test': unreferenced local variable
 C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(169,9): warning C4101:  'cen': unreferenced local variable
 C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(151,9): warning C4101:  'j_c': unreferenced local variable
-C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(151,9): warning C4101: C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(239) : error C4700: uninitialized local variable 'rn' used
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppCommon.targets(429,5): error MSB6006: "CL.exe" exited with code 2.
+  ElectroThermal.vcxproj -> C:\Users\jc15\source\repos\ElectroThermal\Debug\ElectroThermal.exe

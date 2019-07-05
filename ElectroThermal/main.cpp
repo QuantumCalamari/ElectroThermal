@@ -130,7 +130,7 @@ int main()
 	double* i_c;
 	double i_c_test;
 
-	double i_wire;
+	double i_wire = i_app;
 	double i_prev;
 	
 	double z0 = 50;
@@ -235,9 +235,14 @@ int main()
 		else
 			i_c = 0;
 
+		rn = 0;
+		i_wire = 0;
+
 			for (int r_sum = 0; r_sum < x_num; r_sum++) {
+				//need to include rho term
 				rn += r * (b_width * d);
 			}
+	
 
 			if (rn == 0) {
 				i_wire = i_app;
