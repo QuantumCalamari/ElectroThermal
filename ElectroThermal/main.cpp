@@ -129,9 +129,14 @@ int main()
 	//critical current
 	double* i_c;
 	double i_c_test;
+
+	double i_wire;
+	double i_prev;
 	
+	double z0 = 50;
+
 	//resistance
-	double r = 3.0;
+	double r = 3;
 	//normal state resistance
 	double rn;
 
@@ -192,9 +197,7 @@ int main()
 
 	for (i = 0; i < x_num; i++)
 	{
-		x[i] = ((double)(x_num - i - 1) * x_min
-			+ (double)(i)* x_max)
-			/ (double)(x_num - 1);
+		x[i] = ((double)(x_num - i - 1) * x_min + (double)(i)* x_max) / (double)(x_num - 1);
 	}
 	// 
 	//  Set T values.
@@ -227,16 +230,25 @@ int main()
 	if (j == 0) {
 		k = lorenz * u[i] / rho;
 
-
-
 		if (u[i] < t_c)
 			i_c[i] = i_c_abs * sqr(1 - (sqr(u[i] / t_c)));
 		else
 			i_c = 0;
 
-		j_den = i_app / (b_width * d);
-		
-		if (u[i + j * x_num] < t_c || i_app < i_c[i]) {
+			for (int r_sum = 0; r_sum < x_num; r_sum++) {
+				rn += r * (b_width * d);
+			}
+
+			if (rn == 0) {
+				i_wire = i_app;
+			}
+			else {
+				i_wire = z0 / rn * i_app * (1 / (1 + z0 / rn));
+			}
+
+			j_den = i_wire / (b_width * d);
+
+		if (u[i + j * x_num] < t_c && i_wire < i_c[i]) {
 			rho = 0;
 			k = lorenz * sqr(u[i + (j - 1) * x_num]) / (r * (b_width * d) * (u[i + (j - 1) * x_num] / t_c));
 			c = A_prop * exp(-delta / (kb * u[i]));
@@ -333,9 +345,9 @@ int main()
 					c = A_prop * exp(-delta / (kb * u[i + (j - 1) * x_num]));
 				}
 
-				j_den = i_app / (b_width * d);
+				j_den = i_wire / (b_width * d);
 				//k = lorenz * 
-				if (u[i + (j-1) * x_num] < t_c && i_app < i_c[i])
+				if (u[i + (j-1) * x_num] < t_c && i_wire < i_c[i])
 					rho = 0;
 				else
 					rho = r*(b_width * d)/ len_seg;
