@@ -235,21 +235,22 @@ int main()
 		else
 			i_c = 0;
 
+		//I should move this into a function -------------
 		rn = 0;
 		i_wire = 0;
 
-			for (int r_sum = 0; r_sum < x_num; r_sum++) {
-				//need to include rho term
-				rn += r * (b_width * d);
-			}
-	
+		for (int r_sum = 0; r_sum < x_num; r_sum++) {
+			//need to include rho term
+			rn += r * (b_width * d);
+		}
 
-			if (rn == 0) {
-				i_wire = i_app;
-			}
-			else {
-				i_wire = z0 / rn * i_app * (1 / (1 + z0 / rn));
-			}
+		if (rn == 0) {
+			i_wire = i_app;
+		}
+		else {
+			i_wire = z0 / rn * i_app * (1 / (1 + z0 / rn));
+		}
+		// --------- down to here, all function
 
 			j_den = i_wire / (b_width * d);
 
