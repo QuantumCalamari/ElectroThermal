@@ -122,7 +122,7 @@ int main()
 	double kb = 1.38064852E-23;
 
 	//applied current
-	double i_app = 105E-6;
+	double i_app = 140E-6;
 	//Ic(0)
 	double i_c_abs = 320E-6;
 	//double i_c = i_c_abs;
@@ -135,14 +135,14 @@ int main()
 	
 	double z0 = 50;
 
-	//resistance
-	double r = 3;
+	//resistance per square
+	double r = 600;
 	//normal state resistance
 	double rn;
 
 	//physical wire dimensions
-	double b_width = 140E-9;
-	double b_length = 15E-9;
+	double b_width = 100E-9;
+	double b_length = 500E-9;
 	double len_seg;
 	double d = 4E-9;
 
@@ -252,7 +252,7 @@ int main()
 		}
 		// --------- down to here, all function
 
-			j_den = i_wire / (b_width * d);
+		j_den = i_wire / (b_width * d);
 
 		if (u[i + j * x_num] < t_c && i_wire < i_c[i]) {
 			rho = 0;
@@ -260,7 +260,7 @@ int main()
 			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 		else {
-			rho = r * (b_width * d);
+			rho = r * d;
 			c = gamma * u[i + j * x_num];
 			k = lorenz * u[i] / rho;
 		}
@@ -339,32 +339,45 @@ int main()
 				i_c[i] = 0;
 			}
 			else {
+
+			//	if (j == 30) {
+
+			//		std::cout << "break time" << std::endl;
+			//	}
+
 				//checks to see if superconductor or normal
 				if (u[i + (j - 1) * x_num] < t_c) {
 					//normal state
 					i_c[i] = i_c_abs * sqr(1 - (sqr(u[i + (j - 1) * x_num] / t_c)));
-					c = gamma * u[i + (j - 1) * x_num];
+					
 				}
 				else {
 					//superconducting state
 					i_c[i] = 0;
-					c = A_prop * exp(-delta / (kb * u[i + (j - 1) * x_num]));
+					
 				}
 
 				j_den = i_wire / (b_width * d);
 				//k = lorenz * 
-				if (u[i + (j-1) * x_num] < t_c && i_wire < i_c[i])
+				if (u[i + (j - 1) * x_num] < t_c && i_wire < i_c[i]) {
+					//superconducting state
+					c = A_prop * exp(-delta / (kb * u[i + (j - 1) * x_num]));
 					rho = 0;
-				else
-					rho = r*(b_width * d)/ len_seg;
+				}
+				else {
+					//normal state
+					c = gamma * u[i + (j - 1) * x_num];
+					rho = r * d;
+				}
 			}
 
-			alpha = beta * sqr(u[i + (j - 1) * x_num]);
+			//alpha = beta * sqr(u[i + (j - 1) * x_num]) * u[i + (j - 1) * x_num];
 			
 			//calculation of joule and radiative transfer
 			
-			joule = sqr(j_den) * rho * t_delt * (b_width * d * len_seg) / (c * nb_den * (b_width * d * len_seg));
-			//joule = i_app * r * t_delt;
+			//joule = (sqr(j_den) * rho * t_delt) / (c * nb_den * (b_width * d * len_seg));
+			
+			joule = (sqr(j_den) * rho * t_delt) * (nb_den * (b_width * d * len_seg)) / c;
 			alpha = B * u[i + (j - 1) * x_num] * sqr(u[i + (j - 1) * x_num]);
 
 			rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
