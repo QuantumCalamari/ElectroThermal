@@ -52,6 +52,8 @@ int main()
 	double x_max;
 	double x_min;
 	int x_num;
+	string r_file;
+	double* rt;
 
 	timestamp();
 	cout << "\n";
@@ -100,6 +102,9 @@ int main()
 
 	//resistance per square
 	double rho = r * (b_width * d);
+	double r0 = 600;
+	double t0 = 300;
+	double a0 = -0.0013986;
 
 	//substrate temperature
 	double t_sub = 2.0;
@@ -151,19 +156,21 @@ int main()
 	//  Set T values.
 	//
 	t_min = 0.0;
-	t_max = 0.00001;
-	t_num = 100001;
+	t_max = 1E-6;
+	t_num = 10001;
 	t_delt = (t_max - t_min) / (double)(t_num - 1);
 
 	//double istep = 10E-3 / (2 * (t_num - 1));
 
 	t = new double[t_num];
+	rt = new double[t_num];
 
 	for (j = 0; j < t_num; j++)
 	{
 		t[j] = ((double)(t_num - j - 1) * t_min
 			+ (double)(j)* t_max)
 			/ (double)(t_num - 1);
+		rt[j] = 0;
 	}
 	//
 	//  Set the initial data, for time T_MIN.
@@ -176,6 +183,8 @@ int main()
 	//  factor it once, and solve repeatedly.
 	//
 	if (j == 0) {
+
+		
 		k = lorenz * u[i] / rho;
 
 		if (u[i] < t_c)
@@ -204,11 +213,11 @@ int main()
 
 		if (u[i + j * x_num] < t_c && i_wire < i_c[i]) {
 			rho = 0;
-			k = lorenz * sqr(u[i + (j - 1) * x_num]) / (r * (b_width * d) * (u[i + (j - 1) * x_num] / t_c));
+			k = lorenz * sqr(u[i + (j - 1) * x_num]) / (r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0)) * d * (u[i + (j - 1) * x_num] / t_c));
 			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 		else {
-			rho = r * d;
+			rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0)) * d;
 			c = gamma * u[i + j * x_num];
 			k = lorenz * u[i] / rho;
 		}
@@ -227,7 +236,7 @@ int main()
 			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 
-	k = 4E4;
+	k = 5.7E4;
 
 	w = k * t_delt / x_delt / x_delt;
 
@@ -315,7 +324,8 @@ int main()
 				else {
 					//normal state
 					c = gamma * u[i + (j - 1) * x_num];
-					rho = r * d;
+					rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0)) * d;
+					rt[j] += rho;
 				}
 			}
 
@@ -335,6 +345,10 @@ int main()
 	}
 
 	//don't touch anything below here -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+	r_file = "r.txt";
+	header = false;
+	dtable_write(r_file, 1, t_num, rt , header);
 
 	x_file = "x.txt";
 	header = false;
