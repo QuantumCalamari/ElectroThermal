@@ -78,7 +78,8 @@ int main()
 	//double i_c = i_c_abs;
 	//critical current
 	double* i_c;
-	double i_c_test;
+	double* i_str;
+	string i_file;
 
 	double i_wire = i_app;
 	double i_prev;
@@ -95,10 +96,13 @@ int main()
 	double b_length = 10E-6;
 	double len_seg;
 	double d = 4E-9;
+	double Lk;
 
 	//current density
 	double j_den = i_app / (b_width * d);
 	double j_c;// = i_c / (b_width * d);
+	double js;
+	double jn;
 
 	//resistance per square
 	double rho = r * (b_width * d);
@@ -156,14 +160,15 @@ int main()
 	//  Set T values.
 	//
 	t_min = 0.0;
-	t_max = 1E-6;
-	t_num = 10001;
+	t_max = 1E-4;
+	t_num = 100001;
 	t_delt = (t_max - t_min) / (double)(t_num - 1);
 
 	//double istep = 10E-3 / (2 * (t_num - 1));
 
 	t = new double[t_num];
 	rt = new double[t_num];
+	i_str = new double[t_num];
 
 	for (j = 0; j < t_num; j++)
 	{
@@ -171,6 +176,7 @@ int main()
 			+ (double)(j)* t_max)
 			/ (double)(t_num - 1);
 		rt[j] = 0;
+		i_str[j] = 0;
 	}
 	//
 	//  Set the initial data, for time T_MIN.
@@ -195,6 +201,7 @@ int main()
 		//I should move this into a function -------------
 		rn = 0;
 		i_wire = 0;
+		
 
 		for (int r_sum = 0; r_sum < x_num; r_sum++) {
 			//need to include rho term
@@ -236,7 +243,7 @@ int main()
 			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 
-	k = 5.7E4;
+	k = 1E3;
 
 	w = k * t_delt / x_delt / x_delt;
 
@@ -301,7 +308,12 @@ int main()
 
 			//		std::cout << "break time" << std::endl;
 			//	}
+				if (rt[j-1] == 0)
+					i_wire = i_app;
+				else
+					i_wire = z0 / rt[j - 1] * i_app * (1 / (1 - z0 / rt[j - 1]));
 
+				i_str[j] = i_wire;
 				//checks to see if superconductor or normal
 				if (u[i + (j - 1) * x_num] < t_c) {
 					//normal state
@@ -320,14 +332,26 @@ int main()
 					//superconducting state
 					c = A_prop * exp(-delta / (kb * u[i + (j - 1) * x_num]));
 					rho = 0;
+
+					jn = j_den * sqr(sqr((u[i + (j - 1) * x_num] / t_c)));
+					js = j_den - jn;
+
+					Lk = 9.10938356E-31 / (2 * js * 1.60217662E-19) * (len_seg / (d * b_width));
 				}
 				else {
 					//normal state
 					c = gamma * u[i + (j - 1) * x_num];
-					rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0)) * d;
+					rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0));
 					rt[j] += rho;
+
+					jn = j_den;
+					js = 0;
+
+					Lk = 9.10938356E-31 / (jn * 1.60217662E-19) * (len_seg / (d * b_width));
 				}
 			}
+
+			std::cout << Lk << std::endl;
 
 			//alpha = beta * sqr(u[i + (j - 1) * x_num]) * u[i + (j - 1) * x_num];
 			
@@ -335,7 +359,7 @@ int main()
 			
 			//joule = (sqr(j_den) * rho * t_delt) / (c * nb_den * (b_width * d * len_seg));
 			
-			joule = (sqr(j_den) * rho) * (nb_den * (b_width * d * len_seg)) / c;
+			joule = (sqr(j_den) * rho * t_delt) * (nb_den * (b_width * d * len_seg)) / c;
 			alpha = B * cube(u[i + (j - 1) * x_num]);
 			//rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
 			rad_sub = (alpha / d * (u[i + (j - 1) * x_num] - t_sub)) * (nb_den * (b_width * d * len_seg)) / c;
@@ -348,7 +372,11 @@ int main()
 
 	r_file = "r.txt";
 	header = false;
-	dtable_write(r_file, 1, t_num, rt , header);
+	dtable_write(r_file, 1, t_num, rt, header);
+
+	i_file = "i.txt";
+	header = false;
+	dtable_write(i_file, 1, t_num, i_str, header);
 
 	x_file = "x.txt";
 	header = false;
@@ -380,6 +408,8 @@ int main()
 	delete[] t;
 	delete[] u;
 	delete[] x;
+	delete[] rt;
+	delete[] i_str;
 
 	clock_t end = clock();
 	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
