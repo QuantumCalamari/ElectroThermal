@@ -96,7 +96,8 @@ int main()
 	double b_length = 10E-6;
 	double len_seg;
 	double d = 4E-9;
-	double Lk;
+	double* Lk;
+	string l_file;
 
 	//current density
 	double j_den = i_app / (b_width * d);
@@ -169,6 +170,7 @@ int main()
 	t = new double[t_num];
 	rt = new double[t_num];
 	i_str = new double[t_num];
+	Lk = new double[t_num];
 
 	for (j = 0; j < t_num; j++)
 	{
@@ -177,6 +179,7 @@ int main()
 			/ (double)(t_num - 1);
 		rt[j] = 0;
 		i_str[j] = 0;
+		Lk[j] = 0;
 	}
 	//
 	//  Set the initial data, for time T_MIN.
@@ -336,7 +339,7 @@ int main()
 					jn = j_den * sqr(sqr((u[i + (j - 1) * x_num] / t_c)));
 					js = j_den - jn;
 
-					Lk = 9.10938356E-31 / (2 * js * 1.60217662E-19) * (len_seg / (d * b_width));
+					Lk[j] += 9.10938356E-31 / (2 * js * 1.60217662E-19) * (len_seg / (d * b_width));
 				}
 				else {
 					//normal state
@@ -347,12 +350,13 @@ int main()
 					jn = j_den;
 					js = 0;
 
-					Lk = 9.10938356E-31 / (jn * 1.60217662E-19) * (len_seg / (d * b_width));
+					Lk[j] += 9.10938356E-31 / (jn * 1.60217662E-19) * (len_seg / (d * b_width));
 				}
 			}
-
-			std::cout << Lk << std::endl;
-
+			if (j > 1) {
+				i_wire = i_app - 5E-9 * (sqr((Lk[j] - Lk[j - 1]) * (i_str[j] - i_str[j - 1]) / t_delt) - (i_str[j]e - i_str[j - 1]) * (rt[j] - rt[j - 1]) / t_delt + z0 * (i_str[j] - i_str[j - 1]) / t_delt);
+				i_str[j] = i_wire;
+			}
 			//alpha = beta * sqr(u[i + (j - 1) * x_num]) * u[i + (j - 1) * x_num];
 			
 			//calculation of joule and radiative transfer
@@ -369,6 +373,10 @@ int main()
 	}
 
 	//don't touch anything below here -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+	l_file = "l.txt";
+	header = false;
+	dtable_write(l_file, 1, t_num, Lk, header);
 
 	r_file = "r.txt";
 	header = false;
@@ -410,6 +418,7 @@ int main()
 	delete[] x;
 	delete[] rt;
 	delete[] i_str;
+	delete[] Lk;
 
 	clock_t end = clock();
 	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
