@@ -80,6 +80,8 @@ int main()
 	double* i_c;
 	double* i_str;
 	string i_file;
+	double delta_i = 0;
+	double delta_i_max = 0.1;
 
 	double i_wire = i_app;
 	double i_prev;
@@ -145,7 +147,7 @@ int main()
 	//
 	x_min = 0.0;
 	x_max = 0.3;
-	x_num = 21;
+	x_num = 201;
 	x_delt = (x_max - x_min) / (double)(x_num - 1);
 	
 	len_seg = b_length / x_num;
@@ -161,8 +163,8 @@ int main()
 	//  Set T values.
 	//
 	t_min = 0.0;
-	t_max = 1E-4;
-	t_num = 100001;
+	t_max = 1E-5;
+	t_num = 10001;
 	t_delt = (t_max - t_min) / (double)(t_num - 1);
 
 	//double istep = 10E-3 / (2 * (t_num - 1));
@@ -246,7 +248,7 @@ int main()
 			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 
-	k = 1E3;
+	k = 1E-1;
 
 	w = k * t_delt / x_delt / x_delt;
 
@@ -299,37 +301,67 @@ int main()
 
 		//don't touch anything above this line ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+		
 		for (i = 0; i < x_num; i++)
 		{
-			
+
 			if (j == 0) {
-				i_c[i] = 0;
+				for (i = 0; i < x_num; i++) {
+					i_c[i] = 0;
+				}
 			}
-			else {
 
-			//	if (j == 30) {
+			if (j > 0) {
+				if (rt[j - 1] == 0)
+					i_wire = i_app * 0.5;
+				else {
+					i_wire = z0 / rt[j - 1] * i_app * (1 / (1 + z0 / rt[j - 1]));
+					delta_i = i_wire - i_str[j - 1];
 
-			//		std::cout << "break time" << std::endl;
-			//	}
-				if (rt[j-1] == 0)
+					if (i_str[j - 1] == 0) {
+						i_wire = i_app * 0.5;
+					}
+					else if (delta_i > 0 && delta_i > abs(i_str[j - 1] * (1 + delta_i_max))) {
+						i_wire = i_str[j - 1] * (1 + delta_i_max);
+					}
+					else if (delta_i < 0 && abs(delta_i) > abs(i_str[j - 1]) * (1 - delta_i_max)) {
+						i_wire = i_str[j - 1] * (1 + delta_i_max);
+					}
+				}
+
+				if (i_wire > i_app)
 					i_wire = i_app;
-				else
-					i_wire = z0 / rt[j - 1] * i_app * (1 / (1 - z0 / rt[j - 1]));
 
 				i_str[j] = i_wire;
+				//temp delta_i code
+			/*	delta_i = i_wire - i_str[j - 1];
+
+				if (delta_i > i_str[j - 1] + (1 + delta_i_max) && delta_i > 0) {
+
+					if (i_str[j - 1] == 0) {
+						i_wire = z0 / rt[j - 1] * i_app * (1 / (1 - z0 / rt[j - 1])) * delta_i_max;
+					}
+					i_wire = i_str[j - 1] + (1 + delta_i_max);
+				}
+				else if (delta_i < 0 && abs(delta_i) > i_str[j - 1] + (1 + delta_i_max)) {
+					if (i_str[j - 1] == 0) {
+						i_wire = z0 / rt[j - 1] * i_app * (1 / (1 - z0 / rt[j - 1])) * (1 - delta_i_max);
+					}
+					i_wire = i_str[j - 1] * (1 - delta_i_max);
+				}*/
+
+				
 				//checks to see if superconductor or normal
 				if (u[i + (j - 1) * x_num] < t_c) {
 					//normal state
 					i_c[i] = i_c_abs * sqr(1 - (sqr(u[i + (j - 1) * x_num] / t_c)));
-					
+
 				}
 				else {
 					//superconducting state
 					i_c[i] = 0;
-					
 				}
 
-				j_den = i_wire / (b_width * d);
 				//k = lorenz * 
 				if (u[i + (j - 1) * x_num] < t_c && j_den < i_c[i] / (b_width * d)) {
 					//superconducting state
@@ -344,7 +376,7 @@ int main()
 				else {
 					//normal state
 					c = gamma * u[i + (j - 1) * x_num];
-					rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0));
+					rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0)) * (d * b_width) / len_seg;
 					rt[j] += rho;
 
 					jn = j_den;
@@ -354,19 +386,29 @@ int main()
 				}
 			}
 			if (j > 1) {
-				i_wire = i_app - 5E-9 * (sqr((Lk[j] - Lk[j - 1]) * (i_str[j] - i_str[j - 1]) / t_delt) - (i_str[j]e - i_str[j - 1]) * (rt[j] - rt[j - 1]) / t_delt + z0 * (i_str[j] - i_str[j - 1]) / t_delt);
-				i_str[j] = i_wire;
+				//i_wire = i_app - 5E-9 * (sqr((Lk[j] - Lk[j - 1]) * (i_str[j] - i_str[j - 1]) / t_delt) - (i_str[j] - i_str[j - 1]) * (rt[j] - rt[j - 1]) / t_delt + z0 * (i_str[j] - i_str[j - 1]) / t_delt);
+				
 			}
+			
+			if (i == 10) {
+
+				//cout << "break time\n" << std::endl;
+			}
+
+			j_den = i_wire / (b_width * d);
+			//i_str[j] = i_wire;
 			//alpha = beta * sqr(u[i + (j - 1) * x_num]) * u[i + (j - 1) * x_num];
 			
 			//calculation of joule and radiative transfer
 			
 			//joule = (sqr(j_den) * rho * t_delt) / (c * nb_den * (b_width * d * len_seg));
 			
-			joule = (sqr(j_den) * rho * t_delt) * (nb_den * (b_width * d * len_seg)) / c;
+
+
+			joule = (sqr(j_den) * rho * t_delt) / c;
 			alpha = B * cube(u[i + (j - 1) * x_num]);
 			//rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
-			rad_sub = (alpha / d * (u[i + (j - 1) * x_num] - t_sub)) * (nb_den * (b_width * d * len_seg)) / c;
+			rad_sub = (alpha / d * (u[i + (j - 1) * x_num] - t_sub)) * (nb_den * (b_width * d * len_seg)) / (c + 9.8* cube(u[i + (j - 1) * x_num]));
 
 			u[i + j * x_num] = fvec[i] - rad_sub + joule;
 		}
@@ -378,32 +420,38 @@ int main()
 	header = false;
 	dtable_write(l_file, 1, t_num, Lk, header);
 
+	cout << "\n";
+	cout << "  Inductance data written to \"" << l_file << "\".\n";
+
 	r_file = "r.txt";
 	header = false;
 	dtable_write(r_file, 1, t_num, rt, header);
+
+	cout << "  Resistance data written to \"" << r_file << "\".\n";
 
 	i_file = "i.txt";
 	header = false;
 	dtable_write(i_file, 1, t_num, i_str, header);
 
+	cout << "  Current data written to \"" << i_file << "\".\n";
+
 	x_file = "x.txt";
 	header = false;
 	dtable_write(x_file, 1, x_num, x, header);
 
-	cout << "\n";
-	cout << "  X data written to \"" << x_file << "\".\n";
+	cout << "  Positional data written to \"" << x_file << "\".\n";
 
 	t_file = "t.txt";
 	header = false;
 	dtable_write(t_file, 1, t_num, t, header);
 
-	cout << "  T data written to \"" << t_file << "\".\n";
+	cout << "  Time data written to \"" << t_file << "\".\n";
 
 	u_file = "u.txt";
 	header = false;
 	dtable_write(u_file, x_num, t_num, u, header);
 
-	cout << "  U data written to \"" << u_file << "\".\n";
+	cout << "  Thermal data written to \"" << u_file << "\".\n";
 
 	cout << "\n";
 	cout << "  Normal end of execution.\n";
