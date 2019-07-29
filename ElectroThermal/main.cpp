@@ -72,7 +72,7 @@ int main()
 	double kb = 1.38064852E-23;
 
 	//applied current
-	double i_app = 100E-6;
+	double i_app = 20E-6;
 	//Ic(0)
 	double i_c_abs = 320E-6;
 	//double i_c = i_c_abs;
@@ -119,7 +119,7 @@ int main()
 	//critical temperature
 	double t_c = 4;
 	//constants alpha and beta
-	double alpha = 2E-1;
+	double alpha = 2E3;
 	double beta = alpha;
 
 
@@ -148,7 +148,7 @@ int main()
 	//
 	x_min = 0.0;
 	x_max = 0.3;
-	x_num = 201;
+	x_num = 2001;
 	x_delt = (x_max - x_min) / (double)(x_num - 1);
 	
 	len_seg = b_length / x_num;
@@ -164,7 +164,7 @@ int main()
 	//  Set T values.
 	//
 	t_min = 0.0;
-	t_max = 1E-5;
+	t_max = 1E-6;
 	t_num = 10001;
 	t_delt = (t_max - t_min) / (double)(t_num - 1);
 
@@ -249,7 +249,7 @@ int main()
 			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 
-	k = 1E-1;
+	k = 5E-1;
 
 	w = k * t_delt / x_delt / x_delt;
 
@@ -316,6 +316,7 @@ int main()
 				if (rt[j - 1] == 0)
 					i_wire = i_app * 0.5;
 				else {
+
 					i_wire = z0 / rt[j - 1] * i_app * (1 / (1 + z0 / rt[j - 1]));
 					delta_i = i_wire - i_str[j - 1];
 
@@ -372,10 +373,13 @@ int main()
 				else {
 					//normal state
 					c = gamma * u[i + (j - 1) * x_num];
+					
 					if (u[i + (j - 1) * x_num] < t0)
-						rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0))/10;
+						rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0)) / (b_width/len_seg);
 					else
-						rho = r0/10;
+						rho = r0;
+
+
 
 					if (rho < 0) {
 
@@ -413,15 +417,18 @@ int main()
 
 			joule = (sqr(j_den) * rho * t_delt) / c;
 
-			if (joule > u[i + (j - 1) * x_num] * 1.1)
-				joule = u[i + (j - 1) * x_num] * 0.1;
+			if (joule > u[i + (j - 1) * x_num] * 1.01)
+				joule = u[i + (j - 1) * x_num] * 0.01;
+
+			if (joule > 0.03)
+				joule = 0.03;
 
 			alpha = B * cube(u[i + (j - 1) * x_num]);
 			//rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
 			rad_sub = (alpha / d * (u[i + (j - 1) * x_num] - t_sub)) * (nb_den * (b_width * d * len_seg)) / (c + 9.8 * cube(u[i + (j - 1) * x_num]));
 			
-			if (abs(rad_sub) > abs(u[i + (j - 1) * x_num] * 1.5))
-				rad_sub = u[i + (j - 1) * x_num] * 0.5;
+			//if (abs(rad_sub) > abs(u[i + (j - 1) * x_num] * 1.8))
+			//	rad_sub = u[i + (j - 1) * x_num] * 1.8;
 
 			u[i + j * x_num] = fvec[i] - rad_sub + joule;
 
