@@ -72,12 +72,13 @@ int main()
 	double kb = 1.38064852E-23;
 
 	//applied current
-	double i_app = 170E-6;
+	double i_app = 100E-6;
 	//Ic(0)
 	double i_c_abs = 320E-6;
 	//double i_c = i_c_abs;
 	//critical current
-	double* i_c;
+	double i_c;
+	double j_c;
 	double* i_str;
 	string i_file;
 	double delta_i = 0;
@@ -103,7 +104,7 @@ int main()
 
 	//current density
 	double j_den = i_app / (b_width * d);
-	double j_c;// = i_c / (b_width * d);
+	//double j_c;// = i_c / (b_width * d);
 	double js;
 	double jn;
 
@@ -152,7 +153,7 @@ int main()
 	
 	len_seg = b_length / x_num;
 
-	i_c = new double[x_num];
+	//i_c = new double[x_num];
 	x = new double[x_num];
 
 	for (i = 0; i < x_num; i++)
@@ -199,7 +200,7 @@ int main()
 		k = lorenz * u[i] / rho;
 
 		if (u[i] < t_c)
-			i_c[i] = i_c_abs * sqr(1 - (sqr(u[i] / t_c)));
+			i_c = i_c_abs * sqr(1 - (sqr(u[i] / t_c)));
 		else
 			i_c = 0;
 
@@ -223,7 +224,7 @@ int main()
 
 		j_den = i_wire / (b_width * d);
 
-		if (u[i + j * x_num] < t_c && i_wire < i_c[i]) {
+		if (u[i + j * x_num] < t_c && i_wire < i_c) {
 			rho = 0;
 			k = lorenz * sqr(u[i + (j - 1) * x_num]) / (r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0)) * d * (u[i + (j - 1) * x_num] / t_c));
 			c = A_prop * exp(-delta / (kb * u[i]));
@@ -307,7 +308,7 @@ int main()
 
 			if (j == 0) {
 				for (i = 0; i < x_num; i++) {
-					i_c[i] = 0;
+					i_c = 0;
 				}
 			}
 
@@ -325,7 +326,7 @@ int main()
 						i_wire = i_str[j - 1] * (1 + delta_i_max);
 					}
 					else if (delta_i < 0 && abs(delta_i) > abs(i_str[j - 1]) * (1 - delta_i_max)) {
-						i_wire = i_str[j - 1] * (1 + delta_i_max);
+						i_wire = i_str[j - 1] * (1 - delta_i_max);
 					}
 				}
 
@@ -334,36 +335,31 @@ int main()
 
 				i_str[j] = i_wire;
 				//temp delta_i code
-			/*	delta_i = i_wire - i_str[j - 1];
+				delta_i = i_wire - i_str[j - 1];
 
-				if (delta_i > i_str[j - 1] + (1 + delta_i_max) && delta_i > 0) {
+				if (u[i + (j - 1) * x_num] < t_c)
+					i_c = i_c_abs * sqr(1 - (sqr(u[i + (j - 1) * x_num] / t_c)));
+				else
+					i_c = 0;
+
+				j_c = i_c / (b_width * d);
+
+				if (delta_i > i_str[j - 1] * (1 + delta_i_max) && delta_i > 0) {
 
 					if (i_str[j - 1] == 0) {
 						i_wire = z0 / rt[j - 1] * i_app * (1 / (1 - z0 / rt[j - 1])) * delta_i_max;
 					}
 					i_wire = i_str[j - 1] + (1 + delta_i_max);
 				}
-				else if (delta_i < 0 && abs(delta_i) > i_str[j - 1] + (1 + delta_i_max)) {
+				else if (delta_i < 0 && abs(delta_i) > i_str[j - 1] * (1 + delta_i_max)) {
 					if (i_str[j - 1] == 0) {
 						i_wire = z0 / rt[j - 1] * i_app * (1 / (1 - z0 / rt[j - 1])) * (1 - delta_i_max);
 					}
 					i_wire = i_str[j - 1] * (1 - delta_i_max);
-				}*/
-
-				
-				//checks to see if superconductor or normal
-				if (u[i + (j - 1) * x_num] < t_c) {
-					//normal state
-					i_c[i] = i_c_abs * sqr(1 - (sqr(u[i + (j - 1) * x_num] / t_c)));
-
-				}
-				else {
-					//superconducting state
-					i_c[i] = 0;
 				}
 
 				//k = lorenz * 
-				if (u[i + (j - 1) * x_num] < t_c && j_den < i_c[i] / (b_width * d)) {
+				if (u[i + (j - 1) * x_num] < t_c && j_den < i_c / (b_width * d)) {
 					//superconducting state
 					c = A_prop * exp(-delta / (kb * u[i + (j - 1) * x_num]));
 					rho = 0;
@@ -376,7 +372,17 @@ int main()
 				else {
 					//normal state
 					c = gamma * u[i + (j - 1) * x_num];
-					rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0)) * (d * b_width) / len_seg;
+					if (u[i + (j - 1) * x_num] < t0)
+						rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0))/10;
+					else
+						rho = r0/10;
+
+					if (rho < 0) {
+
+						std::cout << "seriously but, how the fuck is it negative" << std::endl;
+						rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0));
+					}
+
 					rt[j] += rho;
 
 					jn = j_den;
@@ -406,11 +412,22 @@ int main()
 
 
 			joule = (sqr(j_den) * rho * t_delt) / c;
+
+			if (joule > u[i + (j - 1) * x_num] * 1.1)
+				joule = u[i + (j - 1) * x_num] * 0.1;
+
 			alpha = B * cube(u[i + (j - 1) * x_num]);
 			//rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
-			rad_sub = (alpha / d * (u[i + (j - 1) * x_num] - t_sub)) * (nb_den * (b_width * d * len_seg)) / (c + 9.8* cube(u[i + (j - 1) * x_num]));
+			rad_sub = (alpha / d * (u[i + (j - 1) * x_num] - t_sub)) * (nb_den * (b_width * d * len_seg)) / (c + 9.8 * cube(u[i + (j - 1) * x_num]));
+			
+			if (abs(rad_sub) > abs(u[i + (j - 1) * x_num] * 1.5))
+				rad_sub = u[i + (j - 1) * x_num] * 0.5;
 
 			u[i + j * x_num] = fvec[i] - rad_sub + joule;
+
+			if (u[i + j * x_num] < 0) {
+				u[i + j * x_num] = u[i + (j - 1) * x_num];
+			}
 		}
 	}
 

@@ -1,6 +1,5 @@
 ﻿  main.cpp
-C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(130,9): warning C4101:  'ces': unreferenced local variable
-C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(87,9): warning C4101:  'i_prev': unreferenced local variable
-C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(129,9): warning C4101:  'cen': unreferenced local variable
-C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(106,9): warning C4101:  'j_c': unreferenced local variable
+C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(131,9): warning C4101:  'ces': unreferenced local variable
+C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(88,9): warning C4101:  'i_prev': unreferenced local variable
+C:\Users\jc15\source\repos\ElectroThermal\ElectroThermal\main.cpp(130,9): warning C4101:  'cen': unreferenced local variable
   ElectroThermal.vcxproj -> C:\Users\jc15\source\repos\ElectroThermal\Debug\ElectroThermal.exe
