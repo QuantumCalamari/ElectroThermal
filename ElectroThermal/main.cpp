@@ -4,6 +4,7 @@
 # include <fstream>
 # include <ctime>
 # include <cmath>
+# include <string>
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 
 using namespace std;
@@ -102,6 +103,11 @@ int main()
 	double* Lk;
 	string l_file;
 
+	//photon parameters
+	int p_t = 50;
+	double p_lambda = 1550E-9;
+	double p_e = 0;
+
 	//current density
 	double j_den = i_app / (b_width * d);
 	//double j_c;// = i_c / (b_width * d);
@@ -121,7 +127,6 @@ int main()
 	//constants alpha and beta
 	double alpha = 2E3;
 	double beta = alpha;
-
 
 	//specific heat constants
 	double gamma = 240.0;
@@ -148,7 +153,7 @@ int main()
 	//
 	x_min = 0.0;
 	x_max = 0.3;
-	x_num = 2001;
+	x_num = 201;
 	x_delt = (x_max - x_min) / (double)(x_num - 1);
 	
 	len_seg = b_length / x_num;
@@ -164,7 +169,7 @@ int main()
 	//  Set T values.
 	//
 	t_min = 0.0;
-	t_max = 1E-6;
+	t_max = 1E-5;
 	t_num = 10001;
 	t_delt = (t_max - t_min) / (double)(t_num - 1);
 
@@ -249,7 +254,7 @@ int main()
 			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 
-	k = 5E-1;
+	k = 5E5;
 
 	w = k * t_delt / x_delt / x_delt;
 
@@ -306,6 +311,7 @@ int main()
 		for (i = 0; i < x_num; i++)
 		{
 
+
 			if (j == 0) {
 				for (i = 0; i < x_num; i++) {
 					i_c = 0;
@@ -313,6 +319,15 @@ int main()
 			}
 
 			if (j > 0) {
+
+				if (j == p_t && i == (x_num - 1) / 2) {
+					//p_e = 6.626E-34 / p_lambda / (A_prop * exp(-delta / (kb * u[i + (j - 1) * x_num])) * b_width * d * len_seg);
+					p_e = 10;
+				}
+				else {
+					p_e = 0;
+				}
+
 				if (rt[j - 1] == 0)
 					i_wire = i_app * 0.5;
 				else {
@@ -359,7 +374,6 @@ int main()
 					i_wire = i_str[j - 1] * (1 - delta_i_max);
 				}
 
-				//k = lorenz * 
 				if (u[i + (j - 1) * x_num] < t_c && j_den < i_c / (b_width * d)) {
 					//superconducting state
 					c = A_prop * exp(-delta / (kb * u[i + (j - 1) * x_num]));
@@ -423,14 +437,18 @@ int main()
 			if (joule > 0.03)
 				joule = 0.03;
 
+			c = 12200;
+
 			alpha = B * cube(u[i + (j - 1) * x_num]);
 			//rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
-			rad_sub = (alpha / d * (u[i + (j - 1) * x_num] - t_sub)) * (nb_den * (b_width * d * len_seg)) / (c + 9.8 * cube(u[i + (j - 1) * x_num]));
+			rad_sub = (alpha / d * (u[i + (j - 1) * x_num] - t_sub)) / (c + 9.8 * cube(u[i + (j - 1) * x_num])) * t_delt;
+		
 			
+
 			//if (abs(rad_sub) > abs(u[i + (j - 1) * x_num] * 1.8))
 			//	rad_sub = u[i + (j - 1) * x_num] * 1.8;
 
-			u[i + j * x_num] = fvec[i] - rad_sub + joule;
+			u[i + j * x_num] = fvec[i] - rad_sub + joule + p_e;
 
 			if (u[i + j * x_num] < 0) {
 				u[i + j * x_num] = u[i + (j - 1) * x_num];
@@ -683,8 +701,6 @@ void u0(double a, double b, double t0, int n, double x[], double value[])
 	{
 		value[i] = 2.0;
 	}
-
-	value[10] = 12;
 	
 	return;
 }
