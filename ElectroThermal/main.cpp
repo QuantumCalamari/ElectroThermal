@@ -83,7 +83,7 @@ int main()
 	double* i_str;
 	string i_file;
 	double delta_i = 0;
-	double delta_i_max = 0.1;
+	double delta_i_max = 0.2;
 
 	double i_wire = i_app;
 	double i_prev;
@@ -420,7 +420,7 @@ int main()
 			if (joule > 0.03)
 				joule = 0.03;
 
-			c = 12200;
+			//c = 12200;
 
 			alpha = B * cube(u[i + (j - 1) * x_num]);
 			//rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
