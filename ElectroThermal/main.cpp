@@ -254,7 +254,7 @@ int main()
 			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 
-	k = 5E5;
+	k = 2E2;
 
 	w = k * t_delt / x_delt / x_delt;
 
@@ -322,28 +322,41 @@ int main()
 
 				if (j == p_t && i == (x_num - 1) / 2) {
 					//p_e = 6.626E-34 / p_lambda / (A_prop * exp(-delta / (kb * u[i + (j - 1) * x_num])) * b_width * d * len_seg);
-					p_e = 10;
+					p_e = 12;
 				}
 				else {
 					p_e = 0;
 				}
 
+
+
 				if (rt[j - 1] == 0)
-					i_wire = i_app * 0.5;
+					i_wire = i_app;
 				else {
 
 					i_wire = z0 / rt[j - 1] * i_app * (1 / (1 + z0 / rt[j - 1]));
 					delta_i = i_wire - i_str[j - 1];
 
+					if (i_str[j - 1] > i_wire) {
+						if (i_str[j - 1] * (1 - delta_i) > i_wire)
+							i_wire = i_str[j - 1] * (1 - delta_i);
+					}
+
+					if (i_str[j - 1] < i_wire) {
+						if (i_str[j - 1] * (1 + delta_i) < i_wire)
+							i_wire = i_str[j - 1] * (1 + delta_i);
+					}
+					
 					if (i_str[j - 1] == 0) {
 						i_wire = i_app * 0.5;
 					}
+					/*
 					else if (delta_i > 0 && delta_i > abs(i_str[j - 1] * (1 + delta_i_max))) {
 						i_wire = i_str[j - 1] * (1 + delta_i_max);
 					}
 					else if (delta_i < 0 && abs(delta_i) > abs(i_str[j - 1]) * (1 - delta_i_max)) {
 						i_wire = i_str[j - 1] * (1 - delta_i_max);
-					}
+					}*/
 				}
 
 				if (i_wire > i_app)
@@ -360,21 +373,9 @@ int main()
 
 				j_c = i_c / (b_width * d);
 
-				if (delta_i > i_str[j - 1] * (1 + delta_i_max) && delta_i > 0) {
+				
 
-					if (i_str[j - 1] == 0) {
-						i_wire = z0 / rt[j - 1] * i_app * (1 / (1 - z0 / rt[j - 1])) * delta_i_max;
-					}
-					i_wire = i_str[j - 1] + (1 + delta_i_max);
-				}
-				else if (delta_i < 0 && abs(delta_i) > i_str[j - 1] * (1 + delta_i_max)) {
-					if (i_str[j - 1] == 0) {
-						i_wire = z0 / rt[j - 1] * i_app * (1 / (1 - z0 / rt[j - 1])) * (1 - delta_i_max);
-					}
-					i_wire = i_str[j - 1] * (1 - delta_i_max);
-				}
-
-				if (u[i + (j - 1) * x_num] < t_c && j_den < i_c / (b_width * d)) {
+				if (u[i + (j - 1) * x_num] < t_c && i_wire < i_c) {
 					//superconducting state
 					c = A_prop * exp(-delta / (kb * u[i + (j - 1) * x_num]));
 					rho = 0;
@@ -393,8 +394,6 @@ int main()
 					else
 						rho = r0;
 
-
-
 					if (rho < 0) {
 
 						std::cout << "seriously but, how the fuck is it negative" << std::endl;
@@ -409,30 +408,14 @@ int main()
 					Lk[j] += 9.10938356E-31 / (jn * 1.60217662E-19) * (len_seg / (d * b_width));
 				}
 			}
-			if (j > 1) {
-				//i_wire = i_app - 5E-9 * (sqr((Lk[j] - Lk[j - 1]) * (i_str[j] - i_str[j - 1]) / t_delt) - (i_str[j] - i_str[j - 1]) * (rt[j] - rt[j - 1]) / t_delt + z0 * (i_str[j] - i_str[j - 1]) / t_delt);
-				
-			}
-			
-			if (i == 10) {
 
-				//cout << "break time\n" << std::endl;
-			}
 
 			j_den = i_wire / (b_width * d);
-			//i_str[j] = i_wire;
-			//alpha = beta * sqr(u[i + (j - 1) * x_num]) * u[i + (j - 1) * x_num];
-			
-			//calculation of joule and radiative transfer
-			
-			//joule = (sqr(j_den) * rho * t_delt) / (c * nb_den * (b_width * d * len_seg));
-			
-
 
 			joule = (sqr(j_den) * rho * t_delt) / c;
 
-			if (joule > u[i + (j - 1) * x_num] * 1.01)
-				joule = u[i + (j - 1) * x_num] * 0.01;
+			if (joule > u[i + (j - 1) * x_num] * 1.1)
+				joule = u[i + (j - 1) * x_num] * 0.1;
 
 			if (joule > 0.03)
 				joule = 0.03;
@@ -442,7 +425,7 @@ int main()
 			alpha = B * cube(u[i + (j - 1) * x_num]);
 			//rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
 			rad_sub = (alpha / d * (u[i + (j - 1) * x_num] - t_sub)) / (c + 9.8 * cube(u[i + (j - 1) * x_num])) * t_delt;
-		
+			//rad_sub = 0;
 			
 
 			//if (abs(rad_sub) > abs(u[i + (j - 1) * x_num] * 1.8))
