@@ -424,8 +424,8 @@ int main()
 
 			alpha = B * cube(u[i + (j - 1) * x_num]);
 			//rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
-			rad_sub = (alpha / d * (u[i + (j - 1) * x_num] - t_sub)) / (c + 9.8 * cube(u[i + (j - 1) * x_num])) * t_delt;
-			//rad_sub = 0;
+			rad_sub = (alpha / d * (fvec[i] - t_sub)) / (c + 9.8 * cube(fvec[i])) * t_delt;
+			rad_sub = 0;
 			
 
 			//if (abs(rad_sub) > abs(u[i + (j - 1) * x_num] * 1.8))
