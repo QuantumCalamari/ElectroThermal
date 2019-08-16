@@ -6,6 +6,9 @@ import numpy as np
 def f(x, y):
     return x*y
 
+#x_fileName = "x.txt"
+#t_fileName = "t.txt"
+
 x_fileName = "../../x.txt"
 t_fileName = "../../t.txt"
 
@@ -14,6 +17,7 @@ t_lineList = [line.rstrip('\n') for line in open(t_fileName)]
 
 
 with open("../../u.txt") as textFile:
+#with open("u.txt") as textFile:
     lines = [line.split() for line in textFile]
 
 x = list(map(float, x_lineList))
@@ -22,7 +26,7 @@ y = list(map(float, t_lineList))
 X, Y = np.meshgrid(x, y)
 Z = lines
 
-plt.contourf(X, Y, Z, 20, cmap='RdGy');
+plt.contourf(X, Y, Z, 20, cmap='rainbow');
 plt.colorbar();
 #plt.show();
 
