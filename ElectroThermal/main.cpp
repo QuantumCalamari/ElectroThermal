@@ -5,6 +5,7 @@
 # include <ctime>
 # include <cmath>
 # include <string>
+# include <math.h>
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 
 using namespace std;
@@ -73,7 +74,7 @@ int main()
 	double kb = 1.38064852E-23;
 
 	//applied current
-	double i_app = 20E-6;
+	double i_app = 0E-6;
 	//Ic(0)
 	double i_c_abs = 320E-6;
 	//double i_c = i_c_abs;
@@ -91,7 +92,7 @@ int main()
 	double z0 = 50;
 
 	//resistance per square
-	double r = 600;
+	double r =1;
 	//normal state resistance
 	double rn;
 
@@ -116,14 +117,14 @@ int main()
 
 	//resistance per square
 	double rho = r * (b_width * d);
-	double r0 = 600;
+	double r0 = r;
 	double t0 = 300;
 	double a0 = -0.0013986;
 
 	//substrate temperature
-	double t_sub = 2.0;
+	double t_sub = 4.0;
 	//critical temperature
-	double t_c = 4;
+	double t_c = 9.2;
 	//constants alpha and beta
 	double alpha = 2E3;
 	double beta = alpha;
@@ -138,7 +139,7 @@ int main()
 	double c;
 	double A_prop = 2.43 * gamma * t_c / exp(-delta / (kb * t_c));
 	double nb_den = 8570;
-	double B = 8E2; //calculated from the Yang paper, alpha = 8E5 at 10 K
+	double B = 2E-3; //calculated from the Yang paper, alpha = 8E5 at 10 K
 
 	//radiative transfer term
 	double rad_sub = 0;
@@ -286,6 +287,9 @@ int main()
 
 	for (j = 1; j < t_num; j++)
 	{
+		i_app = 4e-6 * t[j] / t_max;
+		//std::cout << i_app << std::endl;
+		//you can make a function for the current here
 		//
 		//  Set the right hand side B.
 		//
@@ -373,6 +377,7 @@ int main()
 
 				j_c = i_c / (b_width * d);
 
+				//std::cout << i_c << std::endl;
 				
 
 				if (u[i + (j - 1) * x_num] < t_c && i_wire < i_c) {
@@ -413,19 +418,20 @@ int main()
 			j_den = i_wire / (b_width * d);
 
 			joule = (sqr(j_den) * rho * t_delt) / c;
+			
+			//if (joule > u[i + (j - 1) * x_num] * 1.1)
+			//	joule = u[i + (j - 1) * x_num] * 0.1;
 
-			if (joule > u[i + (j - 1) * x_num] * 1.1)
-				joule = u[i + (j - 1) * x_num] * 0.1;
-
-			if (joule > 0.03)
-				joule = 0.03;
+			//if (joule > 0.03)
+			//	joule = 0.03;
 
 			//c = 12200;
 
-			alpha = B * cube(u[i + (j - 1) * x_num]);
+			//alpha = B * cube(u[i + (j - 1) * x_num]);
+			alpha = 8E5;
 			//rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
 			rad_sub = (alpha / d * (fvec[i] - t_sub)) / (c + 9.8 * cube(fvec[i])) * t_delt;
-			rad_sub = 0;
+			//rad_sub = 0;
 			
 
 			//if (abs(rad_sub) > abs(u[i + (j - 1) * x_num] * 1.8))
@@ -678,11 +684,9 @@ void timestamp()
 
 void u0(double a, double b, double t0, int n, double x[], double value[])
 {
-	int i;
-
-	for (i = 0; i < n; i++)
+	for (int i = 0; i < n; i++)
 	{
-		value[i] = 2.0;
+		value[i] = 4.0;
 	}
 	
 	return;
@@ -693,7 +697,7 @@ double ua(double a, double b, double t0, double t)
 {
 	double value;
 
-	value = 2.0;
+	value = 4.0;
 
 	return value;
 }
@@ -703,7 +707,7 @@ double ub(double a, double b, double t0, double t)
 {
 	double value;
 
-	value = 2.0;
+	value = 4.0;
 	
 	return value;
 }
