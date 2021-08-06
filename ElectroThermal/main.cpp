@@ -74,7 +74,7 @@ int main()
 	double kb = 1.38064852E-23;
 
 	//applied current
-	double i_app = 0E-6;
+	double i_app = 500E-6;
 	//Ic(0)
 	double i_c_abs = 320E-6;
 	//double i_c = i_c_abs;
@@ -255,7 +255,7 @@ int main()
 			c = A_prop * exp(-delta / (kb * u[i]));
 		}
 
-	k = 2E2;
+	//k = 2E2;
 
 	w = k * t_delt / x_delt / x_delt;
 
@@ -287,7 +287,7 @@ int main()
 
 	for (j = 1; j < t_num; j++)
 	{
-		i_app = 4e-6 * t[j] / t_max;
+		i_app = 250e-6*sin(5*6.28*(t[j] / t_max)) + 250e-6;
 		//std::cout << i_app << std::endl;
 		//you can make a function for the current here
 		//
@@ -417,6 +417,8 @@ int main()
 
 			j_den = i_wire / (b_width * d);
 
+			c = 12200;
+
 			joule = (sqr(j_den) * rho * t_delt) / c;
 			
 			//if (joule > u[i + (j - 1) * x_num] * 1.1)
@@ -425,10 +427,10 @@ int main()
 			//if (joule > 0.03)
 			//	joule = 0.03;
 
-			//c = 12200;
+			
 
 			//alpha = B * cube(u[i + (j - 1) * x_num]);
-			alpha = 8E5;
+			//alpha = 8E5;
 			//rad_sub = alpha / d * (u[i + (j - 1) * x_num] - t_sub) * t_delt / (c * nb_den); //needs a heat capacitance and a mass term somewhere
 			rad_sub = (alpha / d * (fvec[i] - t_sub)) / (c + 9.8 * cube(fvec[i])) * t_delt;
 			//rad_sub = 0;
