@@ -92,13 +92,13 @@ int main()
 	double z0 = 50;
 
 	//resistance per square
-	double r =1;
+	double r = 1;
 	//normal state resistance
 	double rn;
 
 	//physical wire dimensions
 	double b_width = 100E-9;
-	double b_length = 10E-6;
+	double b_length = 100E-6;
 	double len_seg;
 	double d = 4E-9;
 	double* Lk;
@@ -154,7 +154,7 @@ int main()
 	//
 	x_min = 0.0;
 	x_max = 0.3;
-	x_num = 201;
+	x_num = 51;
 	x_delt = (x_max - x_min) / (double)(x_num - 1);
 	
 	len_seg = b_length / x_num;
@@ -397,7 +397,7 @@ int main()
 					if (u[i + (j - 1) * x_num] < t0)
 						rho = r0 * (1 + a0 * (u[i + (j - 1) * x_num] - t0)) / (b_width/len_seg);
 					else
-						rho = r0;
+						rho = r0 / (b_width / len_seg);
 
 					if (rho < 0) {
 
